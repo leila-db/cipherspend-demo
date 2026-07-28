@@ -4,8 +4,9 @@
 Flask>=3.0
 numpy>=1.24
 
-# Dev-only (NOT needed to run the app): retraining the categorizer with
-#   python scripts/train_categorizer.py
-# additionally requires:
-#   scikit-learn>=1.3
-#   scipy>=1.10
+# Dev-only (NOT needed to run the app):
+#   Running the test suite (python -m pytest -q) requires:
+#     pytest>=7.0
+#   Retraining the categorizer (python scripts/train_categorizer.py) requires:
+#     scikit-learn>=1.3
+#     scipy>=1.10

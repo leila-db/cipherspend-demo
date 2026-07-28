@@ -34,6 +34,7 @@ python -m app.server          # http://127.0.0.1:5057
 ### 1. Unit + integration suite
 
 ```bash
+pip install pytest        # test-only dependency, not required to run the app
 python -m pytest -q
 ```
 
