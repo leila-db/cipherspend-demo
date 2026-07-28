@@ -1,0 +1,28 @@
+# ---- build output ----
+stage4/build/
+stage5/build/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# ---- crypto artifacts & run state (NEVER publish: keys, ciphertexts, decrypted) ----
+# Belt-and-suspenders: no key/ciphertext/decrypted file can be added from ANY dir.
+artifacts/
+**/artifacts/
+**/run/
+app/run/
+stage5/run/
+stage4/artifacts/
+**/client_home/
+**/server_home/
+*.bin
+*.ct
+*.f64
+merchant_cache.json
+
+# ---- local/real financial data (only synthetic demo data is generated in code) ----
+# `data/fixtures/*.csv` are NOT needed by tests (tests use reference.fixtures
+# generators); ignore all of data/ so a real CSV dropped here can never be committed.
+data/
+*.csv
