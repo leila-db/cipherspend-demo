@@ -68,8 +68,7 @@ FHE hides the *values*, not the *shape* of the computation. The server unavoidab
 ## Local data handling
 
 - **Only synthetic data ships** in this repository. No real transactions, keys, ciphertexts,
-  decrypted results, or caches are tracked (verified against the full git history — see
-  [SECURITY_REVIEW.md](SECURITY_REVIEW.md#data-leak-audit)).
+  decrypted results, or caches are tracked (verified against the full git history).
 - **Your uploads never leave your device**, are held in the browser's memory (and, during a
   run, as transient ciphertext + cleartext under the git-ignored `app/run/jobs/<id>/`, then
   deleted), and are never transmitted anywhere.
