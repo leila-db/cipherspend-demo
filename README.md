@@ -1,7 +1,10 @@
 # CipherSpend
 
 A **local, educational demo** of privacy-preserving personal-finance analytics built on
-**CKKS fully homomorphic encryption** (via [OpenFHE](https://github.com/openfheorg/openfhe-development)).
+**CKKS fully homomorphic encryption**, using a hand-written FHE circuit on **upstream
+[OpenFHE](https://github.com/openfheorg/openfhe-development) 1.5.1** (C++). It was **designed
+with Niobium's FHE application-design methodology** — see [Implementation stack](#implementation-stack)
+and [Niobium ecosystem](#niobium-ecosystem).
 Your transactions are encrypted on your device; a "server" role computes monthly
 aggregates **directly on the ciphertext** and never holds the key to read them; the
 results are decrypted only on your device.
@@ -42,6 +45,30 @@ your secret key, or any readable result. It receives ciphertext and returns ciph
 not your data), the **number of monthly batches** (a coarse, padding-blurred sense of how
 many months of history you have), and **timing** (how long the computation ran — which is
 independent of your values, since the circuit is data-oblivious).
+
+---
+
+## Implementation stack
+
+This is a **CPU MVP**. The entire FHE computation is **hand-written C++ against upstream
+OpenFHE 1.5.1** — there is no domain-specific language, no code-generated circuit, and no
+instrumented crypto fork involved at runtime.
+
+| Layer | What it is |
+|---|---|
+| FHE circuit | Four hand-written C++ programs on **upstream OpenFHE 1.5.1** (CKKS) — `keygen`, `encrypt`, `server`, `decrypt` in `stage5/` |
+| Orchestration | Python 3 + Flask (local server, binds `127.0.0.1`) |
+| Analytics | Python (`analytics/`, `reference/`) — runs locally on decrypted aggregates |
+| Frontend | Vanilla-JS single-page app (no build step) |
+| Categorizer | Char n-gram logistic-regression model (JSON), run in-browser JS + Python |
+| Build / run | `cmake` + `find_package(OpenFHE)`; `python -m app.server` |
+
+**Not runtime dependencies today.** The Niobium DSL, the FHETCH Polynomial IR (`.fhetch`),
+the `niobium-client` instrumentation, the instrumented OpenFHE fork, and the Fog compilation
+service are **not** used at runtime. The app links the stock upstream OpenFHE 1.5.1 system
+install (`/usr/local/lib/OpenFHE`), **not** `NiobiumInc/openfhe-development`. See
+[Niobium ecosystem](#niobium-ecosystem) for what informed the design and what a future
+integration would add.
 
 ---
 
@@ -113,6 +140,44 @@ python -m app.server
 Then open <http://127.0.0.1:5057> and click **Try demo dataset** (synthetic 14-month
 sample) or **Use my own data** to upload a CSV. The server binds to **127.0.0.1 only**,
 runs with Flask debug **off**, and makes no external network calls of any kind.
+
+## Niobium ecosystem
+
+CipherSpend was **designed using Niobium's FHE application-design methodology and
+constraints**, and its architecture is intended to remain portable to Niobium's tooling. To
+be precise about what is and isn't wired in, here is the split across three tiers.
+
+### Used today (runtime)
+- **Upstream [OpenFHE 1.5.1](https://github.com/openfheorg/openfhe-development)** (CKKS) — the only cryptographic dependency.
+- Flask + numpy (Python) and vanilla JavaScript.
+- **No Niobium package is a runtime dependency, and CipherSpend does not currently run through any Niobium tooling.**
+
+### Informed the design (design-time, not runtime)
+- **[NiobiumInc/niobium-skills](https://github.com/NiobiumInc/niobium-skills)** — the
+  `fhe-application-design` skill ("FHEanna"). This methodology guided the design and set the
+  hard crypto constraints CipherSpend follows: CKKS, ring dimension `2^16`, ≥128-bit
+  security, **no bootstrapping (multiplicative depth 0)**, a fixed rotation-key set, no
+  relinearization, secret-key-client-only, and a semi-honest threat model. See
+  [FHE_ARCHITECTURE.md](FHE_ARCHITECTURE.md).
+- Niobium's FHE guides — *"Building Your First FHE Application"* and *"What FHE can and
+  cannot do"* — shaped the shallow depth-0 aggregation scope and the honest privacy framing
+  in [PRIVACY_CLAIMS.md](PRIVACY_CLAIMS.md).
+
+### Planned future integration (NOT wired in)
+The depth-0, data-oblivious circuit is intended to be portable to Niobium's tooling. **None
+of this is integrated today** — it is a compatibility direction, not a current feature:
+- **[NiobiumInc/niobium-client](https://github.com/NiobiumInc/niobium-client)** — the
+  application-developer path that brackets existing OpenFHE C++ with `niobium::compiler()`
+  calls and records the computation as a FHETCH Polynomial IR trace (`.fhetch`).
+- **[NiobiumInc/niobium-fhetch](https://github.com/NiobiumInc/niobium-fhetch)** — the FHETCH
+  Polynomial IR library and local simulator.
+- The **instrumented OpenFHE fork** ([NiobiumInc/openfhe-development](https://github.com/NiobiumInc/openfhe-development))
+  and the **Fog compilation service**, which optimize a trace and deploy it to the **Niobium
+  Mistic** FHE accelerator.
+
+A future step (not scheduled here) would add `niobium-client` instrumentation to the Stage-5
+server computation so it emits a `.fhetch` trace — **without** changing the circuit, the
+parameters, or the app.
 
 ## Documentation
 
