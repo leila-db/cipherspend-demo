@@ -6,7 +6,7 @@ demo**, not a production financial product and not financial advice.
 
 ## Claims we make
 
-1. **Transaction values are computed on under encryption.** The monthly aggregates (per
+1. **Transaction values are computed under encryption.** The monthly aggregates (per
    category, per week, per month income) are produced by a homomorphic **rotate-and-sum
    fold on CKKS ciphertext**. The server role never sees the plaintext amounts. Parameters:
    CKKS, ring 65536, **HEStd_128_classic (128-bit)**, no bootstrapping. See

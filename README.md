@@ -127,7 +127,7 @@ git-ignored) and are never transmitted.
 
 ## Run it
 
-Requirements: Python 3, a built OpenFHE (1.5.x) system install, and the compiled Stage-5
+Requirements: Python 3, a built OpenFHE 1.5.1 system install (any 1.5.x should work), and the compiled Stage-5
 binaries in `stage5/build/` (`keygen`, `encrypt`, `server`, `decrypt`). See
 [TESTING.md](TESTING.md) for building and the full verification battery.
 

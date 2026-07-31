@@ -1,0 +1,11 @@
+# Publication allow-list enforcement.
+# These are internal development docs / an early prototype that must NOT ship in
+# the public release. `git archive` (the supported way to build the publication
+# tree) honors `export-ignore` and drops them automatically — so the exclusion is
+# enforced by the repo, not by a manual step. Build the release tree with:
+#     git archive --format=tar HEAD | tar -x -C <dest>
+# then run `git ls-files` on <dest> and confirm none of the below appear.
+HANDOFF.md      export-ignore
+ARCHITECTURE.md export-ignore
+DESIGN_UX.md    export-ignore
+prototype/      export-ignore

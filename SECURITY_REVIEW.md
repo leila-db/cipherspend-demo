@@ -116,7 +116,7 @@ semi-honest server but does not verify the server computed correctly.
 
 ## Data-leak audit
 
-The working tree **and full git history** (8 commits, 2 branches) were audited.
+The working tree **and full git history** were audited (as of the pre-publication audit commit `2f501f8`).
 
 - **Git history is clean.** Every file ever added is identical to the currently-tracked set;
   there were zero deletions. **No secret key, ciphertext, real CSV, cache, or log ever

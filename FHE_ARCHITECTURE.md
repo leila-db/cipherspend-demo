@@ -114,29 +114,31 @@ slot **layout is exact**; the ~10⁻⁶ residual on the real pipeline is the **C
 approximation noise** — negligible for a currency dashboard (values agree to the cent). Cold
 and warm runs produce the same result (differing only by encryption noise ~10⁻⁶).
 
-## Why this circuit is fast (comparison to a deeper FHE app)
+## Why this circuit is fast (vs. a deeper CKKS circuit)
 
-For scale, compare against *VitalVault*, a CKKS wellness-scoring app that computes a
-**nonlinear** score. Same ring dimension (65536), but structurally very different:
+For scale, contrast this depth-0 linear fold with a typical **deep, nonlinear** CKKS
+circuit — for example one that evaluates a high-degree polynomial score (a health/risk
+index, an ML inference) over many encrypted inputs. At the same ring dimension (65536) the
+two are structurally very different:
 
-| | CipherSpend (this app) | VitalVault |
+| | CipherSpend (this app) | A deep nonlinear CKKS circuit |
 |---|---|---|
-| Multiplicative depth | **circuit 0** (set 1) | **20** |
-| Ciphertext modulus chain | **2 RNS limbs** (~110-bit Q) | ~21 limbs (deep chain) |
-| Server operations | 11 rotations + 11 adds per batch | per marker: a **degree-13 Chebyshev** penalty (`EvalChebyshevFunction`) + ct×ct multiplies |
-| ct×ct multiplies | **0** | many (`penalty·weight`, `z·z`, iterated `facc·facc` dependent squaring) across **25 markers** |
-| Relinearization key | **none** | required (`EvalMultKeyGen`) |
+| Multiplicative depth | **circuit 0** (set 1) | high (e.g. ~20) |
+| Ciphertext modulus chain | **2 RNS limbs** (~110-bit Q) | many limbs (deep chain) |
+| Server operations | 11 rotations + 11 adds per batch | polynomial approximations (e.g. Chebyshev) + ct×ct multiplies |
+| ct×ct multiplies | **0** | many (squarings, products), often repeated/dependent |
+| Relinearization key | **none** | required |
 | Rescaling | **none** | after every multiply |
 
 The speed gap is structural, and compounds two ways:
 
 1. **Fewer, cheaper op *types*.** CipherSpend does only *linear* operations (rotations and
-   additions). VitalVault evaluates high-degree nonlinear polynomials on ciphertext — each
-   Chebyshev evaluation is a chain of ct×ct multiplies, each of which needs a tensor product
-   + relinearization (a key-switch) + a rescale. A multiply is far more expensive than a
-   rotation, and there are hundreds of them (× 25 markers) versus **zero** here.
+   additions). A nonlinear circuit evaluates high-degree polynomials on ciphertext — each
+   polynomial (e.g. a Chebyshev approximation) is a chain of ct×ct multiplies, each of which
+   needs a tensor product + relinearization (a key-switch) + a rescale. A multiply is far
+   more expensive than a rotation, and a deep circuit has many of them versus **zero** here.
 2. **A shallower modulus chain.** Every homomorphic operation costs roughly in proportion to
-   the number of RNS limbs. CipherSpend operates on **2** limbs; a depth-20 circuit operates
+   the number of RNS limbs. CipherSpend operates on **2** limbs; a depth-~20 circuit operates
    on ~21, so *even the individual rotations/adds* would be ~10× cheaper here — before
    accounting for the fact that CipherSpend has no multiplies at all.
 
